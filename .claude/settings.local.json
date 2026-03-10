@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:\\\\Users\\\\LENOVO\\\\Desktop\\\\AppPick\\\\pickleball-nest-app\" && npx tsc --noEmit 2>&1)"
+    ]
+  }
+}
