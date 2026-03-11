@@ -1,18 +1,13 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  @Get('facebook')
-  @UseGuards(AuthGuard('facebook'))
-  async facebookLogin() {
-    // Initiates Facebook OAuth2 login
-  }
+  constructor(private readonly authService: AuthService) {}
 
-  @Get('facebook/callback')
-  @UseGuards(AuthGuard('facebook'))
-  async facebookLoginCallback(@Req() req) {
-    // Successful authentication, handle user info here
-    return req.user;
+  @HttpCode(HttpStatus.OK)
+  @Post('me')
+  async facebookLoginFromMobile(@Body('accessToken') accessToken: string) {
+    return this.authService.facebookLogin(accessToken);
   }
 }
