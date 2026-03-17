@@ -6,7 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { TournamentGroup } from './tournament-group.entity';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 import { Team } from './team.entity';
 
 @Entity('group_members')
@@ -25,9 +25,9 @@ export class GroupMember {
   @Column({ name: 'player_id', nullable: true })
   playerId: string;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => UserEntity, { nullable: true })
   @JoinColumn({ name: 'player_id' })
-  player: User;
+  player: UserEntity;
 
   // NULL nếu singles
   @Column({ name: 'team_id', nullable: true })

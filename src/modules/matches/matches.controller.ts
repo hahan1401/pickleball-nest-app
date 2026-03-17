@@ -1,12 +1,10 @@
-import { Controller, Get, Post, Put, Param, Body, UseGuards } from '@nestjs/common';
-import { MatchesService } from './matches.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { User } from '../../domain/entities/user.entity';
+import { UserEntity } from '../../domain/entities/user.entity';
 import { SubmitScoreDto } from './dto/submit-score.dto';
+import { MatchesService } from './matches.service';
 
 @Controller('api')
-@UseGuards(JwtAuthGuard)
 export class MatchesController {
   constructor(private readonly matchesService: MatchesService) {}
 
@@ -18,7 +16,10 @@ export class MatchesController {
 
   // GET /api/tournaments/:id/groups/:gid/standings
   @Get('tournaments/:id/groups/:gid/standings')
-  getStandings(@Param('id') tournamentId: string, @Param('gid') groupId: string) {
+  getStandings(
+    @Param('id') tournamentId: string,
+    @Param('gid') groupId: string,
+  ) {
     return this.matchesService.getStandings(groupId);
   }
 
@@ -32,7 +33,7 @@ export class MatchesController {
   @Post('matches/:id/score')
   submitScore(
     @Param('id') matchId: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserEntity,
     @Body() dto: SubmitScoreDto,
   ) {
     return this.matchesService.submitScore(matchId, user.id, dto);
@@ -42,7 +43,7 @@ export class MatchesController {
   @Put('matches/:id/score')
   updateScore(
     @Param('id') matchId: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserEntity,
     @Body() dto: SubmitScoreDto,
   ) {
     return this.matchesService.updateScore(matchId, user.id, dto);

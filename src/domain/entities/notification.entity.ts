@@ -6,7 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 
 @Entity('notifications')
 export class Notification {
@@ -16,9 +16,9 @@ export class Notification {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @ManyToOne(() => User, (user) => user.notifications)
+  @ManyToOne(() => UserEntity, (user) => user.notifications)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 
   @Column()
   type: string; // 'tournament_invite' | 'request_approved' | 'match_result' | ...

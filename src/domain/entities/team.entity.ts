@@ -7,7 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Tournament } from './tournament.entity';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 import { GroupMember } from './group-member.entity';
 
 @Entity('teams')
@@ -28,16 +28,16 @@ export class Team {
   @Column({ name: 'player1_id' })
   player1Id: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'player1_id' })
-  player1: User;
+  player1: UserEntity;
 
   @Column({ name: 'player2_id' })
   player2Id: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'player2_id' })
-  player2: User;
+  player2: UserEntity;
 
   @OneToMany(() => GroupMember, (member) => member.team)
   groupMembers: GroupMember[];

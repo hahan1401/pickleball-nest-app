@@ -11,7 +11,7 @@ import { Participant } from './participant.entity';
 import { Notification } from './notification.entity';
 
 @Entity('users')
-export class User {
+export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -33,7 +33,13 @@ export class User {
   @Column({ type: 'text', nullable: true })
   bio: string;
 
-  @Column({ name: 'skill_level', type: 'decimal', precision: 2, scale: 1, default: 3.0 })
+  @Column({
+    name: 'skill_level',
+    type: 'decimal',
+    precision: 2,
+    scale: 1,
+    default: 3.0,
+  })
   skillLevel: number;
 
   @Column({ name: 'dominant_hand', nullable: true })

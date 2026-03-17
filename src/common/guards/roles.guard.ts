@@ -1,8 +1,8 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+// import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 
-@Injectable()
-export class RolesGuard implements CanActivate {
-  canActivate(_context: ExecutionContext): boolean {
-    return true; // TODO: implement role-based access
-  }
-}
+// @Injectable()
+// export class RolesGuard implements CanActivate {
+//   canActivate(_context: ExecutionContext): boolean {
+//     return true; // TODO: implement role-based access
+//   }
+// }

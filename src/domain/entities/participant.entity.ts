@@ -7,7 +7,7 @@ import {
   JoinColumn,
   Unique,
 } from 'typeorm';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 import { Tournament } from './tournament.entity';
 import { ParticipantStatus } from '../enums/participant-status.enum';
 
@@ -27,9 +27,9 @@ export class Participant {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @ManyToOne(() => User, (user) => user.participations)
+  @ManyToOne(() => UserEntity, (user) => user.participations)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 
   @Column({ type: 'enum', enum: ParticipantStatus })
   status: ParticipantStatus;

@@ -1,29 +1,27 @@
-import { Controller, Get, Put, Param, Query, UseGuards } from '@nestjs/common';
-import { NotificationsService } from './notifications.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { User } from '../../domain/entities/user.entity';
+import { UserEntity } from '../../domain/entities/user.entity';
+import { NotificationsService } from './notifications.service';
 
 @Controller('api/notifications')
-@UseGuards(JwtAuthGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   // GET /api/notifications
   @Get()
-  findAll(@CurrentUser() user: User, @Query() query: any) {
+  findAll(@CurrentUser() user: UserEntity, @Query() query: any) {
     return this.notificationsService.findAll(user.id, query);
   }
 
   // PUT /api/notifications/:id/read
   @Put(':id/read')
-  markRead(@Param('id') id: string, @CurrentUser() user: User) {
+  markRead(@Param('id') id: string, @CurrentUser() user: UserEntity) {
     return this.notificationsService.markRead(id, user.id);
   }
 
   // PUT /api/notifications/read-all
   @Put('read-all')
-  markAllRead(@CurrentUser() user: User) {
+  markAllRead(@CurrentUser() user: UserEntity) {
     return this.notificationsService.markAllRead(user.id);
   }
 }

@@ -8,7 +8,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 import { Participant } from './participant.entity';
 import { Team } from './team.entity';
 import { TournamentGroup } from './tournament-group.entity';
@@ -25,9 +25,9 @@ export class Tournament {
   @Column({ name: 'creator_id' })
   creatorId: string;
 
-  @ManyToOne(() => User, (user) => user.tournaments)
+  @ManyToOne(() => UserEntity, (user) => user.tournaments)
   @JoinColumn({ name: 'creator_id' })
-  creator: User;
+  creator: UserEntity;
 
   @Column()
   name: string;
@@ -49,7 +49,11 @@ export class Tournament {
   })
   scoringFormat: ScoringFormat;
 
-  @Column({ type: 'enum', enum: TournamentStatus, default: TournamentStatus.DRAFT })
+  @Column({
+    type: 'enum',
+    enum: TournamentStatus,
+    default: TournamentStatus.DRAFT,
+  })
   status: TournamentStatus;
 
   @Column({ type: 'date', nullable: true })
