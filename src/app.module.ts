@@ -13,6 +13,8 @@ import { MatchesModule } from './modules/matches/matches.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { TournamentsModule } from './modules/tournaments/tournaments.module';
 import { UsersModule } from './modules/users/users.module';
+import { MailModule } from './modules/mail/mail.module';
+import { MyBullModule } from './queues/bull.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { UsersModule } from './modules/users/users.module';
     NotificationsModule,
     CommunityModule,
     ChatModule,
+    MailModule,
+    MyBullModule,
   ],
   controllers: [AppController],
   providers: [AppService],
