@@ -3,7 +3,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserEntity } from '../../domain/entities/user.entity';
 import { ChatService } from './chat.service';
 
-@Controller('api/chats')
+@Controller('chats')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 

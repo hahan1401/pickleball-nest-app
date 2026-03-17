@@ -12,7 +12,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserEntity } from '../../domain/entities/user.entity';
 import { CommunityService } from './community.service';
 
-@Controller('api/community')
+@Controller('community')
 export class CommunityController {
   constructor(private readonly communityService: CommunityService) {}
 

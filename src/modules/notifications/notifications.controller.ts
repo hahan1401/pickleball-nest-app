@@ -3,7 +3,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserEntity } from '../../domain/entities/user.entity';
 import { NotificationsService } from './notifications.service';
 
-@Controller('api/notifications')
+@Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
