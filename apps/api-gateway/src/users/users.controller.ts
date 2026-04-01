@@ -1,6 +1,10 @@
+import { CurrentUser } from '@app/common';
+import { Public } from '@app/common/decorators/public-api.decorator';
+import { UserEntity } from '@app/database/entities/user.entity';
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Inject,
@@ -16,10 +20,17 @@ export class UsersController {
   ) {}
 
   @HttpCode(HttpStatus.OK)
+  @Public()
   @Post('me')
   facebookLogin(@Body('accessToken') accessToken: string) {
     return firstValueFrom(
       this.userClient.send({ cmd: 'facebook_login' }, accessToken),
     );
+  }
+
+  @Get('me')
+  getMe(@CurrentUser() user: UserEntity) {
+    console.log('Getting current user info for user:', user);
+    return firstValueFrom(this.userClient.send({ cmd: 'get_me' }, 'userId'));
   }
 }

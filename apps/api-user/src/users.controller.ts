@@ -10,4 +10,9 @@ export class UsersController {
   facebookLogin(@Payload() accessToken: string) {
     return this.usersService.facebookLogin(accessToken);
   }
+
+  @MessagePattern({ cmd: 'get_me' })
+  getMe(@Payload() userId: string) {
+    return this.usersService.getMe(userId);
+  }
 }
