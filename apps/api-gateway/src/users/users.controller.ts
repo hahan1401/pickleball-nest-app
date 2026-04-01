@@ -1,5 +1,5 @@
 import { CurrentUser } from '@app/common';
-import { USER_PATTERN_MESSAGES } from '@app/common/constants/message-patterns/message-patterns';
+import { USER_PATTERN_MESSAGES } from '@app/common/constants/message-patterns/user-message-patterns';
 import { Public } from '@app/common/decorators/public-api.decorator';
 import { UserEntity } from '@app/database/entities/user.entity';
 import {

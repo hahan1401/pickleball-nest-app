@@ -31,6 +31,15 @@
         "tsConfigPath": "apps/api-user/tsconfig.app.json"
       }
     },
+    "api-email": {
+      "type": "application",
+      "root": "apps/api-email",
+      "entryFile": "main",
+      "sourceRoot": "apps/api-email/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api-email/tsconfig.app.json"
+      }
+    },
     "common": {
       "type": "library",
       "root": "libs/common",
