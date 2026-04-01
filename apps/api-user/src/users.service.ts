@@ -4,13 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-interface FacebookProfile {
-  id: string;
-  name: string;
-  email?: string;
-  picture?: { data: { url: string } };
-}
-
 @Injectable()
 export class UsersService {
   constructor(
@@ -19,6 +12,7 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async facebookLogin(accessToken: string) {
     // const fbRes = await fetch(
     //   `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${accessToken}`,
@@ -44,7 +38,7 @@ export class UsersService {
     //   await this.usersRepository.save(user);
     // }
 
-    // const payload = { sub: user.id, facebookUserId: user.facebookUserId };
+    // const payload = { id: user.id, facebookUserId: user.facebookUserId };
 
     let user = await this.usersRepository.findOne({
       where: { facebookUserId: 'facebookUserId' },
@@ -60,8 +54,9 @@ export class UsersService {
     }
 
     const payload = {
-      sub: user.id,
+      id: user.id,
       facebookUserId: user.facebookUserId,
+      email: user.email,
     };
     return { accessToken: this.jwtService.sign(payload), user };
   }

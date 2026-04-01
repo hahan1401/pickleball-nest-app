@@ -1,4 +1,5 @@
 import { CurrentUser } from '@app/common';
+import { USER_PATTERN_MESSAGES } from '@app/common/constants/message-patterns/message-patterns';
 import { Public } from '@app/common/decorators/public-api.decorator';
 import { UserEntity } from '@app/database/entities/user.entity';
 import {
@@ -24,13 +25,14 @@ export class UsersController {
   @Post('me')
   facebookLogin(@Body('accessToken') accessToken: string) {
     return firstValueFrom(
-      this.userClient.send({ cmd: 'facebook_login' }, accessToken),
+      this.userClient.send(USER_PATTERN_MESSAGES.FACEBOOK_LOGIN, accessToken),
     );
   }
 
   @Get('me')
   getMe(@CurrentUser() user: UserEntity) {
-    console.log('Getting current user info for user:', user);
-    return firstValueFrom(this.userClient.send({ cmd: 'get_me' }, 'userId'));
+    return firstValueFrom(
+      this.userClient.send(USER_PATTERN_MESSAGES.GET_ME, user.id),
+    );
   }
 }
