@@ -7,47 +7,50 @@ NestJS monorepo for a Pickleball tournament/match management backend, built on a
 ```
 pickleball-nest-app/
 ├── apps/
-│   ├── api-gateway/                    # HTTP entry point (port 3000)
-│   │   ├── src/
-│   │   │   ├── main.ts
-│   │   │   ├── app.module.ts
-│   │   │   ├── users/
-│   │   │   │   └── users.controller.ts
-│   │   │   └── posts/
-│   │   │       └── posts.controller.ts
-│   │   └── tsconfig.app.json
-│   │
-│   ├── api-user/                       # User microservice (TCP port 3001)
-│   │   ├── src/
-│   │   │   ├── main.ts
-│   │   │   ├── app.module.ts
-│   │   │   ├── users.controller.ts
-│   │   │   ├── users.service.ts
-│   │   │   └── entities/
-│   │   │       └── user.entity.ts
-│   │   └── tsconfig.app.json
-│   │
-│   └── post-service/                   # Post microservice (TCP port 3002)
+│   └── api-gateway/                    # HTTP entry point (port 3000)
 │       ├── src/
 │       │   ├── main.ts
 │       │   ├── app.module.ts
-│       │   ├── posts.controller.ts
-│       │   └── posts.service.ts
+│       │   ├── auth/
+│       │   │   ├── jwt.strategy.ts
+│       │   │   └── jwt-auth.guard.ts
+│       │   └── users/
+│       │       └── users.controller.ts
 │       └── tsconfig.app.json
 │
+│   └── api-user/                       # User microservice (TCP port 3001)
+│       ├── src/
+│       │   ├── main.ts
+│       │   ├── app.module.ts
+│       │   ├── users.controller.ts
+│       └── └── users.service.ts
+│
 ├── libs/
-│   └── common/                         # Shared library (@app/common)
+│   ├── common/                         # Shared library (@app/common)
+│   │   └── src/
+│   │       ├── constants/
+│   │       │   └── message-patterns/
+│   │       │       └── message-patterns.ts
+│   │       ├── decorators/
+│   │       │   ├── public-api.decorator.ts
+│   │       │   └── user.decorator.ts
+│   │       ├── exception-filters/
+│   │       │   └── http-exception.filter.ts
+│   │       ├── interceptors/
+│   │       │   └── response-mapping.interceptor.ts
+│   │       ├── common.module.ts
+│   │       ├── common.service.ts
+│   │       └── index.ts
+│   │
+│   └── database/                       # Database library (@app/database)
 │       └── src/
-│           ├── decorators/
-│           │   └── user.decorator.ts
-│           ├── exception-filters/
-│           │   └── http-exception.filter.ts
-│           ├── interceptors/
-│           │   └── response-mapping.interceptor.ts
-│           ├── common.module.ts
-│           ├── common.service.ts
+│           ├── entities/
+│           │   └── user.entity.ts
+│           ├── database.module.ts
 │           └── index.ts
 │
+├── docs/
+│   └── PROJECT_STRUCTURE.md
 ├── compose.yaml                        # Docker Compose (PostgreSQL)
 ├── nest-cli.json                       # NestJS monorepo config
 ├── package.json
@@ -59,16 +62,24 @@ pickleball-nest-app/
 
 | App | Port | Transport | Role |
 |-----|------|-----------|------|
-| `api-gateway` | 3000 | HTTP | Entry point; applies global filters/interceptors, proxies to microservices |
-| `api-user` | 3001 | TCP | User microservice; Facebook auth, user data |
-| `post-service` | 3002 | TCP | Post microservice (WIP) |
+| `api-gateway` | 3000 | HTTP | Entry point; applies global JWT guard, filters, and interceptors; proxies to microservices |
+| `api-user` | 3001 | TCP | User microservice; handles auth and user data via message patterns |
 
 ## Message Patterns
 
+All patterns are defined as constants in `@app/common` (`libs/common/src/constants/message-patterns/message-patterns.ts`).
+
 | Pattern | Handler | Description |
 |---------|---------|-------------|
-| `{ cmd: 'facebook_login' }` | api-user | Validate FB token, upsert user, return JWT |
-| `{ cmd: 'get_posts' }` | post-service | Return list of posts |
+| `facebook_login` | api-user `UsersService.facebookLogin()` | Validate FB token, upsert user, return JWT |
+| `get_me` | api-user `UsersService.getMe()` | Fetch authenticated user by ID |
+
+## API Endpoints (api-gateway)
+
+| Method | Path | Auth | Proxies To |
+|--------|------|------|------------|
+| `POST` | `/api/auth/me` | Public | `facebook_login` |
+| `GET` | `/api/auth/me` | JWT | `get_me` |
 
 ## Shared Library (`@app/common`)
 
@@ -76,13 +87,24 @@ pickleball-nest-app/
 |--------|-------------|
 | `HttpExceptionFilter` | Global HTTP exception handler; returns `{ statusCode, timestamp, path }` |
 | `ResponseMappingInterceptor` | Wraps all responses as `{ data: <response> }` |
-| `User` | Param decorator; extracts `request.user` and attaches remote IP |
+| `CurrentUser` | Param decorator; extracts `request.user` from context |
+| `Public` / `IS_PUBLIC_KEY` | Route decorator; bypasses global `JwtAuthGuard` |
+| `USER_PATTERN_MESSAGES` | RPC message pattern constants |
+
+## Database Library (`@app/database`)
+
+| Export | Description |
+|--------|-------------|
+| `DatabaseModule` | TypeORM config module; reads DB env vars |
+| `UserEntity` | Player account entity (see below) |
 
 ## Domain Entities
 
 | Entity | Service | Description |
 |--------|---------|-------------|
-| `UserEntity` | api-user | Player account with Facebook OAuth fields |
+| `UserEntity` | api-user | Player account — Facebook OAuth fields, skill level, paddle preferences |
+
+**UserEntity columns:** `id` (UUID PK), `facebookUserId` (unique), `email` (unique), `passwordHash`, `name`, `avatarUrl`, `bio`, `skillLevel` (decimal, default 3.0), `dominantHand`, `paddleType`, `createdAt`, `updatedAt`
 
 ## Infrastructure
 
@@ -90,8 +112,8 @@ pickleball-nest-app/
   - Host: `localhost:5432`
   - Database: `pickleball`
   - User/Password: `postgres/postgres`
-- **ORM**: TypeORM
-- **Auth**: `@nestjs/jwt` (Facebook OAuth flow in api-user)
+- **ORM**: TypeORM (configured in `@app/database`)
+- **Auth**: `@nestjs/jwt` + Passport JWT strategy in api-gateway; JWT issued by api-user
 - **Transport**: `@nestjs/microservices` — TCP between api-gateway and microservices
 
 ## Common Commands
@@ -100,12 +122,10 @@ pickleball-nest-app/
 # Start individual services
 nest start api-gateway --watch    # HTTP on port 3000
 nest start api-user --watch       # TCP on port 3001
-nest start post-service --watch   # TCP on port 3002
 
 # Build
 nest build api-gateway
 nest build api-user
-nest build post-service
 
 # Run tests
 npm run test
@@ -121,11 +141,9 @@ docker compose up -d
 | `PORT` | `3000` | api-gateway |
 | `USER_SERVICE_HOST` | `localhost` | api-gateway |
 | `USER_SERVICE_PORT` | `3001` | api-gateway, api-user |
-| `POST_SERVICE_HOST` | `localhost` | api-gateway |
-| `POST_SERVICE_PORT` | `3002` | api-gateway, post-service |
-| `JWT_SECRET` | `changeme` | api-user |
-| `DB_HOST` | `localhost` | api-user |
-| `DB_PORT` | `5432` | api-user |
-| `DB_USERNAME` | `postgres` | api-user |
-| `DB_PASSWORD` | `postgres` | api-user |
-| `DB_NAME` | `pickleball` | api-user |
+| `JWT_SECRET` | `changeme` | api-gateway, api-user |
+| `DB_HOST` | `localhost` | @app/database |
+| `DB_PORT` | `5432` | @app/database |
+| `DB_USERNAME` | `postgres` | @app/database |
+| `DB_PASSWORD` | `postgres` | @app/database |
+| `DB_NAME` | `pickleball` | @app/database |

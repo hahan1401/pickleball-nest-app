@@ -31,15 +31,6 @@
         "tsConfigPath": "apps/api-user/tsconfig.app.json"
       }
     },
-    "post-service": {
-      "type": "application",
-      "root": "apps/post-service",
-      "entryFile": "main",
-      "sourceRoot": "apps/post-service/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/post-service/tsconfig.app.json"
-      }
-    },
     "common": {
       "type": "library",
       "root": "libs/common",
