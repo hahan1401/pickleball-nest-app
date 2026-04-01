@@ -39,13 +39,4 @@ export class UserEntity {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
-
-  // @OneToMany(() => Tournament, (tournament) => tournament.creator)
-  // tournaments: Tournament[];
-
-  // @OneToMany(() => Participant, (participant) => participant.user)
-  // participations: Participant[];
-
-  // @OneToMany(() => Notification, (notification) => notification.user)
-  // notifications: Notification[];
 }

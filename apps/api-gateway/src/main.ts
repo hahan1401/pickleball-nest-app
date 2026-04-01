@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './exception-filters/http-exception.filter';
-import { ResponseMappingInterceptor } from './interceptors/responseMaping.interceptor';
+import { HttpExceptionFilter } from '@app/common/exception-filters/http-exception.filter';
+import { ResponseMappingInterceptor } from '@app/common/interceptors/response-mapping.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -9,6 +9,6 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ResponseMappingInterceptor());
 
-  await app.listen(3000);
+  await app.listen(parseInt(process.env.PORT || '3000'));
 }
 bootstrap();

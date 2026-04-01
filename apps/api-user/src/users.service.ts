@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../users/user.entity';
+import { UserEntity } from './entities/user.entity';
 
 interface FacebookProfile {
   id: string;
@@ -12,7 +12,7 @@ interface FacebookProfile {
 }
 
 @Injectable()
-export class AuthService {
+export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
