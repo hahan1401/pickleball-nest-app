@@ -6,6 +6,11 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UsersController } from './users/users.controller';
 import { EmailController } from './email/email.controller';
 import { JwtStrategy } from './auth/jwt.strategy';
+import {
+  RABBITMQ_EXCHANGE,
+  RABBITMQ_QUEUE,
+  RABBITMQ_ROUTING_KEY,
+} from '@app/common/constants/rabbitmq.constants';
 
 @Module({
   imports: [
@@ -34,13 +39,20 @@ import { JwtStrategy } from './auth/jwt.strategy';
       {
         name: 'EMAIL_SERVICE',
         useFactory: (config: ConfigService) => ({
-          transport: Transport.TCP,
+          transport: Transport.RMQ,
           options: {
-            host: config.get<string>('EMAIL_SERVICE_HOST', 'localhost'),
-            port: parseInt(
-              config.get<string>('EMAIL_SERVICE_PORT', '3002'),
-              10,
-            ),
+            urls: [
+              config.get<string>(
+                'RABBITMQ_URL',
+                'amqp://guest:guest@localhost:5672',
+              ),
+            ],
+            queue: RABBITMQ_QUEUE,
+            exchange: RABBITMQ_EXCHANGE,
+            exchangeType: 'topic',
+            routingKey: RABBITMQ_ROUTING_KEY,
+            queueOptions: { durable: true },
+            exchangeOptions: { durable: true },
           },
         }),
         inject: [ConfigService],
