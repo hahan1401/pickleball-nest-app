@@ -29,7 +29,7 @@ export class NotificationGateway
 
   handleConnection(client: Socket) {
     const userId = this.extractUserIdFromNamespace(client.nsp.name);
-    
+
     if (!userId) {
       this.logger.warn(`Invalid namespace: ${client.nsp.name}`);
       client.disconnect();
@@ -53,10 +53,10 @@ export class NotificationGateway
 
   handleDisconnect(client: Socket) {
     const userId = this.extractUserIdFromNamespace(client.nsp.name);
-    
+
     if (userId && this.clients.has(userId)) {
       this.clients.get(userId).delete(client);
-      
+
       if (this.clients.get(userId).size === 0) {
         this.clients.delete(userId);
       }
@@ -72,7 +72,7 @@ export class NotificationGateway
    */
   sendToUser(userId: string, event: string, data: any) {
     const userClients = this.clients.get(userId);
-    
+
     if (!userClients || userClients.size === 0) {
       this.logger.warn(`No connected clients for user ${userId}`);
       return false;

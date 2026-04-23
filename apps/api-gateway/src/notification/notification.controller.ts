@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, HttpStatus, Inject, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Post,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NOTIFICATION_EVENTS, Public } from '@app/common';
@@ -24,9 +31,7 @@ export class NotificationController {
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('send-push')
   @Public()
-  sendPushNotification(
-    @Body() payload: { userId: string; message: string },
-  ) {
+  sendPushNotification(@Body() payload: { userId: string; message: string }) {
     // Publish to RabbitMQ - notification microservice will handle delivery
     this.notificationClient.emit(
       NOTIFICATION_EVENTS.PUSH_NOTIFICATION,
@@ -40,7 +45,9 @@ export class NotificationController {
   }
 
   @Public()
-  @ApiOperation({ summary: 'Test notification to user1 and user2 via RabbitMQ' })
+  @ApiOperation({
+    summary: 'Test notification to user1 and user2 via RabbitMQ',
+  })
   @ApiBody({
     schema: {
       properties: {

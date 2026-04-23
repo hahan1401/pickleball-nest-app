@@ -23,7 +23,9 @@ export class NotificationService {
     );
 
     if (sent) {
-      this.logger.log(`✅ WebSocket notification delivered to user ${payload.userId}`);
+      this.logger.log(
+        `✅ WebSocket notification delivered to user ${payload.userId}`,
+      );
     } else {
       this.logger.warn(
         `⚠️  User ${payload.userId} not connected via WebSocket`,
