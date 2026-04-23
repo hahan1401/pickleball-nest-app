@@ -1,6 +1,8 @@
 import { UserEntity } from '@app/database/entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { EMAIL_EVENTS, NOTIFICATION_EVENTS } from '@app/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -10,6 +12,10 @@ export class UsersService {
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
     private readonly jwtService: JwtService,
+    @Inject('EMAIL_SERVICE')
+    private readonly emailClient: ClientProxy,
+    @Inject('NOTIFICATION_SERVICE')
+    private readonly notificationClient: ClientProxy,
   ) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -51,7 +57,13 @@ export class UsersService {
         avatarUrl: 'avatarUrl',
       });
       await this.usersRepository.save(user);
+      // Send welcome email and notification simultaneously
     }
+    this.emailClient.emit(EMAIL_EVENTS.WELCOME, user.email);
+    this.notificationClient.emit(NOTIFICATION_EVENTS.PUSH_NOTIFICATION, {
+      userId: user.id,
+      message: `Welcome to Pickleball, ${user.name}!`,
+    });
 
     const payload = {
       id: user.id,

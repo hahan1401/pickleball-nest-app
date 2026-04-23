@@ -1,3 +1,6 @@
-export const EMAIL_PATTERN_MESSAGES = {
-  SEND_WELCOME: 'email.send_welcome',
+export const EMAIL_EVENTS = {
+  WELCOME: 'email.welcome',
 };
+
+/** @deprecated Use EMAIL_EVENTS instead */
+export const EMAIL_PATTERN_MESSAGES = EMAIL_EVENTS;

@@ -5,7 +5,8 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
+    "tsConfigPath": "apps/api-gateway/tsconfig.app.json",
+    "plugins": ["@nestjs/swagger"]
   },
   "generateOptions": {
     "spec": false
@@ -19,7 +20,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/api-gateway/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
+        "tsConfigPath": "apps/api-gateway/tsconfig.app.json",
+        "plugins": ["@nestjs/swagger"]
       }
     },
     "api-user": {
@@ -38,6 +40,15 @@
       "sourceRoot": "apps/api-email/src",
       "compilerOptions": {
         "tsConfigPath": "apps/api-email/tsconfig.app.json"
+      }
+    },
+    "api-notification": {
+      "type": "application",
+      "root": "apps/api-notification",
+      "entryFile": "main",
+      "sourceRoot": "apps/api-notification/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api-notification/tsconfig.app.json"
       }
     },
     "common": {

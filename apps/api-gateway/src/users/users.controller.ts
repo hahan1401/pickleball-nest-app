@@ -12,14 +12,18 @@ import {
   Post,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class UsersController {
   constructor(
     @Inject('USER_SERVICE') private readonly userClient: ClientProxy,
   ) {}
 
+  @ApiOperation({ summary: 'Login with Facebook access token' })
+  @ApiBody({ schema: { properties: { accessToken: { type: 'string' } } } })
   @HttpCode(HttpStatus.OK)
   @Public()
   @Post('me')
@@ -29,6 +33,8 @@ export class UsersController {
     );
   }
 
+  @ApiOperation({ summary: 'Get current authenticated user' })
+  @ApiBearerAuth()
   @Get('me')
   getMe(@CurrentUser() user: UserEntity) {
     return firstValueFrom(

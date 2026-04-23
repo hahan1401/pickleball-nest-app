@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 10px 5px 10px 0;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1976D2;
+        }
+        button.success {
+            background-color: #4CAF50;
+        }
+        button.success:hover {
+            background-color: #45a049;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+            min-height: 50px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            display: none;
+        }
+        #response.error {
+            background-color: #ffebee;
+            border-color: #f44336;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+        .info code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .endpoint {
+            color: #1976D2;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Notification API Tester</h1>
+        <p class="subtitle">Test RabbitMQ-based notification system with WebSocket delivery</p>
+
+        <div class="info">
+            <strong>📡 Architecture:</strong> 
+            <code class="endpoint">Client → Gateway (port 3000) → RabbitMQ → Notification Service (port 3003) → WebSocket</code>
+            <br><br>
+            <strong>Test Endpoint:</strong> 
+            <code class="endpoint">POST http://localhost:3000/api/notification/test-users</code>
+            <br><br>
+            <strong>WebSocket Server:</strong> 
+            <code class="endpoint">ws://localhost:3003/notification/:userId</code>
+            <br><br>
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Make sure <code>api-gateway</code> is running on port 3000</li>
+                <li>Make sure <code>api-notification</code> microservice is running on port 3003</li>
+                <li>Make sure <code>RabbitMQ</code> is running</li>
+                <li>Open <code>websocket-test-client.html</code> in two browser tabs (one for user1, one for user2)</li>
+                <li>Click the button below to send notifications via RabbitMQ</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Notification to user1 and user2</h3>
+            <label for="message">Message:</label>
+            <input 
+                type="text" 
+                id="message" 
+                placeholder="Enter your test message" 
+                value="Hello from RabbitMQ! 🎉"
+            >
+            <button onclick="sendTestNotification()" class="success">
+                📨 Send to user1 & user2 via RabbitMQ
+            </button>
+            <button onclick="quickTest1()">
+                🚀 Quick Test 1
+            </button>
+            <button onclick="quickTest2()">
+                🎯 Quick Test 2
+            </button>
+            <button onclick="quickTest3()">
+                ⚡ Quick Test 3
+            </button>
+        </div>
+
+        <div class="test-section">
+            <h3>Send to Specific User</h3>
+            <label for="userId">User ID:</label>
+            <input 
+                type="text" 
+                id="userId" 
+                placeholder="e.g., user1, user2, user123" 
+                value="user1"
+            >
+            <label for="specificMessage">Message:</label>
+            <input 
+                type="text" 
+                id="specificMessage" 
+                placeholder="Enter message for specific user" 
+                value="Direct message!"
+            >
+            <button onclick="sendSpecificNotification()">
+                📤 Send to Specific User
+            </button>
+        </div>
+
+        <div id="response"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api/notification';
+
+        function showResponse(data, isError = false) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = isError ? 'error' : '';
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function sendTestNotification() {
+            const message = document.getElementById('message').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/test-users`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                showResponse(data);
+                
+                if (response.ok) {
+                    console.log('✅ Notifications sent successfully:', data);
+                } else {
+                    console.error('❌ Error:', data);
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, true);
+                console.error('❌ Request failed:', error);
+            }
+        }
+
+        async function sendSpecificNotification() {
+            const userId = document.getElementById('userId').value;
+            const message = document.getElementById('specificMessage').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/send-push`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId, message })
+                });
+
+                const data = await response.json();
+                showResponse(data);
+                
+                if (response.ok) {
+                    console.log('✅ Notification sent successfully:', data);
+                } else {
+                    console.error('❌ Error:', data);
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, true);
+                console.error('❌ Request failed:', error);
+            }
+        }
+
+        async function quickTest1() {
+            document.getElementById('message').value = '🎉 System Update: New features available!';
+            await sendTestNotification();
+        }
+
+        async function quickTest2() {
+            document.getElementById('message').value = '⚠️ Maintenance Alert: Scheduled at 10 PM';
+            await sendTestNotification();
+        }
+
+        async function quickTest3() {
+            document.getElementById('message').value = '✨ Welcome! You have a new message.';
+            await sendTestNotification();
+        }
+
+        // Keyboard shortcuts
+        document.getElementById('message').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendTestNotification();
+            }
+        });
+
+        document.getElementById('specificMessage').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendSpecificNotification();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 version: '3.8'
 services:
   pickleball-db:
-    image: postgres:15
+    image: postgres
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -11,7 +11,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
 
   rabbitmq:
     image: rabbitmq:3-management
