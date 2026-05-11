@@ -6,6 +6,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UsersController } from './users/users.controller';
 import { EmailController } from './email/email.controller';
 import { NotificationController } from './notification/notification.controller';
+import { NotificationGateway } from './notification/notification.gateway';
 import { JwtStrategy } from './auth/jwt.strategy';
 import {
   RABBITMQ_EXCHANGE,
@@ -84,6 +85,6 @@ import {
     ]),
   ],
   controllers: [UsersController, EmailController, NotificationController],
-  providers: [JwtStrategy],
+  providers: [JwtStrategy, NotificationGateway],
 })
 export class AppModule {}
