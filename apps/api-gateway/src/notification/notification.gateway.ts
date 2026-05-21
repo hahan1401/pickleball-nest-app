@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({
   namespace: /^\/notification\/[\w-]+$/,
@@ -22,13 +23,21 @@ export class NotificationGateway
 
   private readonly logger = new Logger(NotificationGateway.name);
   private clients: Map<string, Set<Socket>> = new Map();
+  private readonly notificationServiceUrl: string;
+
+  constructor(private readonly configService: ConfigService) {
+    this.notificationServiceUrl = this.configService.get<string>(
+      'NOTIFICATION_SERVICE_URL',
+      'http://localhost:3003',
+    );
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
     this.logger.log('WebSocket Gateway initialized in API Gateway');
   }
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     const userId = this.extractUserIdFromNamespace(client.nsp.name);
 
     if (!userId) {
@@ -50,6 +59,8 @@ export class NotificationGateway
       message: `Connected to notification channel for user ${userId}`,
       timestamp: new Date().toISOString(),
     });
+
+    await this.flushPendingNotifications(userId, client);
   }
 
   handleDisconnect(client: Socket) {
@@ -68,9 +79,6 @@ export class NotificationGateway
     }
   }
 
-  /**
-   * Send notification to a specific user
-   */
   sendToUser(userId: string, event: string, data: any) {
     const userClients = this.clients.get(userId);
 
@@ -92,9 +100,6 @@ export class NotificationGateway
     return true;
   }
 
-  /**
-   * Broadcast to all connected users
-   */
   broadcast(event: string, data: any) {
     this.server.emit(event, {
       ...data,
@@ -103,23 +108,54 @@ export class NotificationGateway
     this.logger.log(`Broadcasted "${event}" event to all connected clients`);
   }
 
-  /**
-   * Get count of connected clients for a user
-   */
   getClientCount(userId: string): number {
     return this.clients.get(userId)?.size || 0;
   }
 
-  /**
-   * Get all connected user IDs
-   */
   getConnectedUserIds(): string[] {
     return Array.from(this.clients.keys());
   }
 
-  /**
-   * Extract user ID from namespace (e.g., "/notification/user123" -> "user123")
-   */
+  private async flushPendingNotifications(
+    userId: string,
+    client: Socket,
+  ): Promise<void> {
+    try {
+      const response = await fetch(
+        `${this.notificationServiceUrl}/notifications/pending/${userId}`,
+      );
+
+      if (!response.ok) return;
+
+      const pending: Array<{
+        id: string;
+        message: string;
+        type: string;
+        createdAt: string;
+      }> = await response.json();
+
+      if (pending.length === 0) return;
+
+      pending.forEach((n) => {
+        client.emit('notification', {
+          id: n.id,
+          message: n.message,
+          type: n.type,
+          timestamp: n.createdAt,
+        });
+      });
+
+      this.logger.log(
+        `Flushed ${pending.length} pending notification(s) to user ${userId} on connect`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch pending notifications for user ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
   private extractUserIdFromNamespace(namespace: string): string | null {
     const match = namespace.match(/^\/notification\/([\w-]+)$/);
     return match ? match[1] : null;
