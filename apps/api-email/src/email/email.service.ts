@@ -7,7 +7,13 @@ export class EmailService {
   private readonly ses: SESClient;
 
   constructor(private readonly config: ConfigService) {
-    this.ses = new SESClient({ region: this.config.get<string>('AWS_REGION') });
+    this.ses = new SESClient({
+      region: this.config.get<string>('AWS_REGION'),
+      credentials: {
+        accessKeyId: this.config.get<string>('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: 'assdf',
+      },
+    });
   }
 
   async sendWelcomeEmail(to: string) {
